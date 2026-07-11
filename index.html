@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 가치 여정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF4EA;             /* 크림 배경 */
+  --ink:#4E4438;            /* 진갈색 본문 */
+  --ink-soft:#8C8172;
+  --tan:#B08758;            /* 브라운 포인트 */
+  --tan-deep:#8F6238;
+  --btn-grad:linear-gradient(135deg,#B98A5A,#8F6238);
+  /* 플러스 칩 (흰 바탕 · 연갈 테두리) */
+  --plus-bg:#FFFDF8; --plus-line:#E7DCC6; --plus-text:#6E6252;
+  /* 마이너스 칩 (연살구 바탕 · 코랄) */
+  --minus-bg:#FCF0E7; --minus-line:#EBB59F; --minus-text:#C0614A; --coral-deep:#C9694E;
+  --line:#EADFCB;
+  --card:#FFFDF8;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:30px 20px 90px}
+
+/* ── 진행 표시 ─────────────────────── */
+.trail{display:flex;align-items:center;gap:0;margin:4px auto 40px;max-width:520px}
+.trail .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none;transition:.4s}
+.trail .seg{height:2px;flex:1;background:var(--line);transition:.4s}
+.trail .dot.done,.trail .seg.done{background:var(--tan)}
+.trail .dot.now{background:var(--tan-deep);box-shadow:0 0 0 5px #EFE2CC;transform:scale(1.15)}
+
+/* ── 화면 공통 ─────────────────────── */
+.screen{display:none;animation:rise .5s ease both}
+.screen.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:14px;letter-spacing:.06em;color:var(--tan);font-weight:500;margin-bottom:16px}
+h1{font-family:'Noto Serif KR',serif;font-size:clamp(26px,5.5vw,38px);line-height:1.55;
+  font-weight:400;margin-bottom:18px;white-space:pre-line;letter-spacing:.02em}
+.sub{color:var(--ink-soft);line-height:2;font-size:15.5px;white-space:pre-line;margin-bottom:28px}
+em{font-style:normal;color:var(--tan)}
+
+/* ── 인트로 (중앙 정렬) ─────────────────────── */
+#s-intro{text-align:center;padding-top:30px}
+.leaf{font-size:46px;margin-bottom:24px}
+.intro-facts{display:flex;gap:14px;margin:38px auto 40px;flex-wrap:wrap;max-width:480px;justify-content:center}
+.fact{flex:1;min-width:110px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 12px;text-align:center;box-shadow:0 3px 14px rgba(160,125,80,.07)}
+.fact b{display:block;font-size:24px;color:var(--tan-deep);font-family:'Noto Serif KR',serif;font-weight:400}
+.fact span{font-size:12.5px;color:var(--ink-soft)}
+
+/* ── 버튼 ─────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;
+  padding:16px 42px;border-radius:999px;background:var(--btn-grad);color:#fff;
+  transition:.25s;letter-spacing:.04em;box-shadow:0 6px 18px rgba(143,98,56,.25)}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 22px rgba(143,98,56,.32)}
+.btn:disabled{background:#DCD2C0;box-shadow:none;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);box-shadow:none}
+.btn:focus-visible{outline:3px solid var(--tan);outline-offset:2px}
+
+/* ── 카운터 바 ─────────────────────── */
+.counterbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:12px 0 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-bottom:1px solid var(--line);margin-bottom:26px}
+.count{background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:10px 20px;font-size:14.5px;color:var(--ink-soft);box-shadow:0 2px 8px rgba(160,125,80,.06)}
+.count b{font-family:'Noto Serif KR',serif;font-size:19px;color:var(--tan-deep);margin:0 2px}
+.count.minus b{color:var(--coral-deep)}
+.counterbar .btn{padding:13px 30px}
+
+/* ── 단어 칩 ─────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:14px 12px}
+.chip{border:1px solid var(--plus-line);background:var(--plus-bg);color:var(--plus-text);
+  border-radius:999px;padding:12px 24px;font-size:15.5px;cursor:pointer;font-family:inherit;
+  transition:.18s;line-height:1.3;user-select:none}
+.chip:hover{border-color:var(--tan)}
+.chip.sel{background:var(--tan-deep);border-color:var(--tan-deep);color:#fff}
+.chip.mchip{background:var(--minus-bg);border:1.5px solid var(--minus-line);color:var(--minus-text)}
+.chip.mchip:hover{border-color:var(--coral-deep)}
+.chip.mchip.sel{background:var(--coral-deep);border-color:var(--coral-deep);color:#fff}
+.chip.dropped{background:transparent;border-color:var(--line);color:#C9BFAF;
+  text-decoration:line-through;opacity:.6}
+.chip:focus-visible{outline:3px solid var(--tan);outline-offset:1px}
+
+/* ── 전환(7단계) 카드 ─────────────────────── */
+.flip-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin-bottom:14px}
+.flip-neg{display:inline-block;background:var(--minus-bg);color:var(--coral-deep);
+  border:1px solid var(--minus-line);font-weight:700;border-radius:8px;
+  padding:6px 14px;font-size:15px;margin-bottom:14px}
+.flip-arrow{color:var(--ink-soft);margin-left:10px;font-size:14px}
+.flip-opts{display:flex;flex-wrap:wrap;gap:9px}
+.flip-opts .chip{padding:9px 18px;font-size:14.5px}
+
+/* ── 결과 화면 ─────────────────────── */
+.values{display:flex;flex-direction:column;gap:10px;margin:26px 0 34px;max-width:520px}
+.value-row{display:flex;align-items:center;gap:16px;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);padding:18px 22px;
+  animation:rise .6s ease both;box-shadow:0 3px 12px rgba(160,125,80,.06)}
+.value-row .n{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--tan);width:32px;flex:none}
+.value-row .w{font-family:'Noto Serif KR',serif;font-size:22px;font-weight:600}
+.result-h{font-family:'Noto Serif KR',serif;font-size:20px;font-weight:600;margin:36px 0 8px}
+.prompt-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;margin-top:14px}
+.prompt-box textarea{width:100%;height:260px;border:none;resize:vertical;font-family:inherit;
+  font-size:13px;line-height:1.75;color:var(--ink-soft);background:transparent;outline:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+footer{margin-top:70px;text-align:center;font-size:12.5px;color:#BFB29A}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){
+  .btn{width:100%}
+  .counterbar .btn{width:auto;padding:11px 22px;font-size:14px}
+  .chip{padding:10px 18px;font-size:14.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="trail" id="trail" aria-hidden="true"></div>
+
+  <!-- 인트로 -->
+  <section class="screen on" id="s-intro">
+    <div class="leaf">🌿</div>
+    <h1>나는 어떤
+사람인가요</h1>
+    <p class="sub">200여 개의 단어 중에서
+고르고, 또 내려놓으며
+<em>지금 나를 관통하는 에너지</em>를 만나는 여정입니다.
+
+서두르지 않아도 괜찮아요.
+느끼는 대로, 이끌리는 대로 따라가 보세요.</p>
+    <div class="intro-facts">
+      <div class="fact"><b>8</b><span>단계</span></div>
+      <div class="fact"><b>10~20</b><span>분 소요</span></div>
+      <div class="fact"><b>5</b><span>핵심 가치</span></div>
+    </div>
+    <button class="btn" onclick="start()">여정을 떠나기&nbsp;→</button>
+  </section>
+
+  <!-- 선택/덜어내기 공용 화면 -->
+  <section class="screen" id="s-step">
+    <div class="eyebrow" id="st-eyebrow"></div>
+    <h1 id="st-title"></h1>
+    <p class="sub" id="st-sub"></p>
+    <div class="counterbar">
+      <div class="count" id="st-count"></div>
+      <button class="btn" id="st-next" disabled onclick="nextStep()">다음으로</button>
+    </div>
+    <div class="chips" id="st-chips"></div>
+  </section>
+
+  <!-- 7단계 전환 화면 -->
+  <section class="screen" id="s-flip">
+    <div class="eyebrow">7단계 · 전환</div>
+    <h1>각 에너지의 반대편에서
+하나를 선택해주세요</h1>
+    <p class="sub">마이너스 에너지를 넘어서기 위해 내가 원하는 힘은 무엇인가요?</p>
+    <div class="counterbar">
+      <div class="count" id="fl-count"></div>
+      <button class="btn" id="fl-next" disabled onclick="finishFlip()">다음으로</button>
+    </div>
+    <div id="fl-cards"></div>
+  </section>
+
+  <!-- 완료 화면 -->
+  <section class="screen" id="s-done">
+    <div class="leaf">🌿</div>
+    <div class="eyebrow">완료</div>
+    <h1>당신의 여정이
+완성되었습니다</h1>
+    <p class="sub">아래 프롬프트를 복사해서 AI에게 붙여넣으면
+당신만의 깊은 분석을 받을 수 있습니다.</p>
+    <div class="result-h">나의 핵심 가치 5</div>
+    <div class="values" id="dn-values"></div>
+    <div class="result-h">AI 분석용 프롬프트</div>
+    <div class="prompt-box"><textarea id="dn-prompt" readonly></textarea></div>
+    <div class="actions">
+      <button class="btn" id="dn-copy" onclick="copyPrompt()">복사하기</button>
+      <button class="btn ghost" onclick="location.reload()">처음부터 다시</button>
+    </div>
+  </section>
+
+  <footer>🌿 나의 가치 여정 — 고르고, 내려놓고, 다시 만나는 시간</footer>
+</div>
+
+<script>
+/* ═══════════ 플러스 단어 208개 (원본 사이트 스크린샷 검증, 원본 표시 순서) ═══════════ */
+const POSITIVE = [
+"사랑","헌신","애정","생명","희망","소망","꿈","비전","행복",
+"축복","성공","영광","평안","평화","안정","안전","믿음",
+"신념","확신","신앙","정의","공정","평등","자유","명예",
+"명성","존경","평판","목적의식","책임","사명","방향성","자비",
+"은혜","긍휼","구원","신뢰","약속","신용","한결같음","진실",
+"신실","참됨","진리","우정","우애","의리","호의","탁월함",
+"잠재력","강점","재능","공감","경청","관심","호기심","정직",
+"진심","솔직함","양심","성실","근면","부지런함","우직함",
+"자신감","자긍심","자부심","자존감","용기","배짱","용감함",
+"담대함","인내","끈기","오래참음","기다림","절제","자제","조절",
+"절약","솔선수범","모범","자율성","모델","리더십","영향력",
+"지도","팀워크","용서","포용","관용","아량","도전","성취감",
+"모험","시도","창조","창의성","상상력","독창성","열정","정열",
+"열심","전심","기쁨","즐거움","재미","웃음","겸손","공손",
+"정중","겸허","감사","고마움","보답","만족","배려","친절",
+"양보","섬세함","질서","규칙","정리정돈","예의","온유","온화",
+"온순","따스함","중용","균형감각","조화","원만함","순수","순결",
+"고귀함","깨끗함","청렴","투명함","올곧음","맑음","경건",
+"경외심","거룩함","근신","충만","풍요","여유","풍부","이해",
+"역지사지","인식","인지","지혜","통찰력","슬기로움","현명함",
+"순종","따름","순응","순리","충성","충실","직언","일편단심",
+"섬김","존중","높임","정성","도움","돌봄","나눔","공헌",
+"유연성","융통성","부드러움","적응력","결단력","판단력","의지",
+"신중함","실천력","추진력","행함","집중력","격려","위로","지원",
+"지지","인정","칭찬","추천","진면목","아름다움","멋","심미성",
+"세련미","협력","협동","상생","화목","공동체","공생","동행",
+"공존","성찰","깨달음","반성","자각"
+];
+
+/* ═══════════ 마이너스 단어 147개 (원본 사이트 스크린샷 검증, 원본 표시 순서) ═══════════ */
+/* 각 단어 → 7단계 전환 시 제시되는 반대편 선택지 (좌절→비전, 낙심→소망, 의심→신념,
+   불의→공정, 차별→평등 조합은 원본 데이터로 확인됨. 나머지 선택지 구성은 자체 매핑) */
+const NEGATIVE = {
+"집착":["자유","여유","중용"],
+"죽음":["생명","희망","구원"],
+"절망":["소망","희망","믿음"],
+"낙심":["소망","격려","희망"],
+"좌절":["비전","의지","끈기"],
+"불행":["행복","축복","감사"],
+"시련":["평안","인내","의지"],
+"실패":["성공","도전","성취감"],
+"불안":["평안","안정","믿음"],
+"초조":["여유","기다림","평안"],
+"혼란":["질서","평안","지혜"],
+"의심":["신념","확신","신뢰"],
+"의문":["확신","이해","깨달음"],
+"불확실":["확신","안정","믿음"],
+"불의":["공정","정의","양심"],
+"차별":["평등","공정","존중"],
+"강요":["자율성","존중","자유"],
+"불명예":["명예","존경","평판"],
+"악명":["명성","신뢰","존경"],
+"수치":["자부심","명예","담대함"],
+"무책임":["책임","성실","신용"],
+"공허":["충만","사명","풍요"],
+"무의미":["사명","목적의식","방향성"],
+"잔인":["자비","긍휼","온유"],
+"핍박":["평안","자유","구원"],
+"무자비":["자비","긍휼","관용"],
+"불신":["신뢰","믿음","신용"],
+"모순":["한결같음","진실","조화"],
+"불일치":["한결같음","조화","일편단심"],
+"거짓":["진실","정직","참됨"],
+"왜곡":["진실","올곧음","공정"],
+"위선":["진심","참됨","신실"],
+"시기":["축복","칭찬","인정"],
+"질투":["자존감","축복","만족"],
+"악의":["호의","친절","진심"],
+"약점":["강점","재능","잠재력"],
+"미숙함":["탁월함","슬기로움","현명함"],
+"서투름":["탁월함","정성","끈기"],
+"무감각":["공감","관심","섬세함"],
+"무관심":["관심","공감","배려"],
+"외면":["관심","용기","책임"],
+"거짓말":["정직","진실","솔직함"],
+"속임":["정직","투명함","신뢰"],
+"기만":["진실","정직","신실"],
+"게으름":["근면","부지런함","성실"],
+"불성실":["성실","신실","책임"],
+"변덕":["한결같음","일편단심","신중함"],
+"두려움":["용기","담대함","믿음"],
+"열등감":["자신감","자긍심","자존감"],
+"자기비하":["자존감","자부심","격려"],
+"허풍":["진실","겸손","참됨"],
+"공포":["용기","평안","믿음"],
+"비겁":["용기","용감함","배짱"],
+"단념":["끈기","의지","소망"],
+"조급함":["인내","기다림","여유"],
+"서두름":["신중함","여유","기다림"],
+"중독":["절제","자제","자유"],
+"남용":["절제","조절","근신"],
+"낭비":["절약","절제","조절"],
+"수동":["실천력","추진력","자율성"],
+"타율성":["자율성","자유","의지"],
+"비자발적":["자율성","열정","시도"],
+"종속":["자유","자율성","의지"],
+"모방":["독창성","창의성","창조"],
+"표절":["독창성","정직","창조"],
+"낡음":["창조","비전","시도"],
+"과욕":["절제","중용","만족"],
+"나태함":["근면","열심","부지런함"],
+"빈둥거림":["열심","실천력","부지런함"],
+"슬픔":["기쁨","위로","행복"],
+"지루함":["재미","즐거움","호기심"],
+"우울":["기쁨","행복","위로"],
+"교만":["겸손","겸허","공손"],
+"거만":["겸손","공손","존중"],
+"우쭐댐":["겸허","근신","겸손"],
+"불평":["감사","고마움","만족"],
+"원망":["용서","감사","화목"],
+"불만":["만족","감사","고마움"],
+"무시":["존중","높임","인정"],
+"불친절":["친절","호의","배려"],
+"둔감함":["섬세함","공감","인식"],
+"무질서":["질서","정리정돈","규칙"],
+"위법":["규칙","양심","올곧음"],
+"무례":["예의","정중","존중"],
+"포악":["온유","온화","자비"],
+"난폭":["온순","온화","절제"],
+"냉정함":["따스함","공감","친절"],
+"모자람":["충만","풍부","탁월함"],
+"넘침":["절제","중용","조절"],
+"치우침":["균형감각","중용","공정"],
+"혼탁":["맑음","깨끗함","투명함"],
+"불순함":["순수","순결","깨끗함"],
+"더러움":["깨끗함","순결","맑음"],
+"부패":["청렴","깨끗함","올곧음"],
+"탐욕":["절제","나눔","만족"],
+"부정":["정직","청렴","올곧음"],
+"타락":["거룩함","경건","구원"],
+"속됨":["거룩함","고귀함","경건"],
+"경거망동":["근신","신중함","자제"],
+"부족":["충만","풍요","풍부"],
+"결핍":["풍요","충만","만족"],
+"궁색":["풍요","여유","풍부"],
+"오해":["이해","역지사지","경청"],
+"편견":["역지사지","이해","포용"],
+"선입견":["이해","포용","공정"],
+"미련":["결단력","지혜","자유"],
+"어리석음":["지혜","슬기로움","현명함"],
+"무식":["지혜","인식","깨달음"],
+"역행":["순리","순응","방향성"],
+"반항":["순종","따름","존중"],
+"거부":["포용","관용","아량"],
+"배신":["의리","충성","신실"],
+"아첨":["진심","정직","직언"],
+"중상모략":["정직","진실","존중"],
+"군림":["섬김","겸손","팀워크"],
+"업신여김":["존중","높임","인정"],
+"지배":["섬김","협력","상생"],
+"방관":["책임","도움","행함"],
+"방치":["돌봄","정성","책임"],
+"착취":["상생","나눔","공정"],
+"경직":["유연성","융통성","부드러움"],
+"부적응":["적응력","유연성","원만함"],
+"고정관념":["유연성","창의성","이해"],
+"우유부단":["결단력","판단력","확신"],
+"망설임":["결단력","용기","실천력"],
+"경솔":["신중함","근신","판단력"],
+"무기력":["의지","열정","열심"],
+"탁상공론":["실천력","행함","추진력"],
+"분주함":["여유","평안","질서"],
+"조롱":["존중","격려","칭찬"],
+"책망":["격려","칭찬","관용"],
+"모욕":["존중","높임","예의"],
+"비웃음":["존중","격려","따스함"],
+"험담":["칭찬","정직","존중"],
+"비난":["격려","칭찬","이해"],
+"추함":["아름다움","멋","고귀함"],
+"흉함":["아름다움","세련미","조화"],
+"진부함":["독창성","창의성","멋"],
+"분열":["화목","공동체","협동"],
+"갈등":["화목","조화","이해"],
+"분쟁":["평화","화목","상생"],
+"소외":["동행","공동체","포용"],
+"따돌림":["포용","우정","공동체"],
+"이기심":["배려","나눔","양보"],
+"무지":["지혜","인식","깨달음"],
+"무의식":["자각","인식","성찰"],
+"뻔뻔함":["양심","겸손","반성"]
+};
+const NEG_WORDS = Object.keys(NEGATIVE);
+
+/* ═══════════ 단계 정의 ═══════════ */
+const STEPS = [
+ {id:1,mode:"pick", pool:()=>POSITIVE, need:20, minus:false,
+  eyebrow:"1단계 · 플러스 에너지",
+  title:"나에게 울림이 있는\n단어를 20개 골라주세요",
+  sub:"지금 내 안에 있거나, 갖고 싶은 에너지를 느껴보세요.\n서두르지 않아도 됩니다.",
+  label:"선택"},
+ {id:2,mode:"drop", need:5, minus:false,
+  eyebrow:"2단계 · 덜어내기",
+  title:"20개 중 5개를\n내려놓아 주세요",
+  sub:"지금 당장 내게 꼭 필요하지 않은 단어를 놓아보세요.",
+  label:"제거"},
+ {id:3,mode:"drop", need:5, minus:false,
+  eyebrow:"3단계 · 더 덜어내기",
+  title:"15개 중 5개를\n더 내려놓아 주세요",
+  sub:"쉽지 않겠지만, 더 깊은 곳에 있는 나를 만나게 됩니다.",
+  label:"제거"},
+ {id:4,mode:"drop", need:5, minus:false,
+  eyebrow:"4단계 · 마지막 덜어내기",
+  title:"10개 중 5개를\n마지막으로 내려놓아 주세요",
+  sub:"남은 5개가 지금 이 순간, 내 삶의 핵심 에너지입니다.",
+  label:"제거"},
+ {id:5,mode:"pick", pool:()=>NEG_WORDS, need:10, minus:true,
+  eyebrow:"5단계 · 마이너스 에너지",
+  title:"원하지 않거나 극복하고 싶은\n단어를 10개 골라주세요",
+  sub:"지금 나를 힘들게 하거나, 내 안에 있지만 벗어나고 싶은 에너지들입니다.\n외면하지 않고 직면하는 것이 변화의 시작입니다.",
+  label:"선택"},
+ {id:6,mode:"drop", need:5, minus:true,
+  eyebrow:"6단계 · 마이너스 덜어내기",
+  title:"10개 중 5개를\n내려놓아 주세요",
+  sub:"지금 당장 내가 가장 마주하고 싶은 과제 5개만 남겨주세요.",
+  label:"제거"},
+ /* 7단계는 별도 화면(flip) */
+ {id:8,mode:"pick", pool:()=>state.finalPool, need:5, minus:false,
+  eyebrow:"8단계 · 최종 선택",
+  title:"10개 중 지금의 나를\n가장 잘 담은 5개를 선택해주세요",
+  sub:"긍정의 여정에서 끝까지 살아남은 단어, 그리고 결핍에서 내가 원하는 방향으로 고른 단어들입니다.\n진짜 나에게 울림이 있는 5개를 남겨주세요.",
+  label:"선택"}
+];
+
+/* ═══════════ 상태 & 계측 ═══════════ */
+const state = {
+  stepIdx:-1, trailPos:0,
+  pool:[], selected:new Set(),
+  pos20:[], dropped1:[], pos15:[], dropped2:[], pos10:[], dropped3:[], pos5:[],
+  neg10:[], droppedNeg:[], neg5:[],
+  flips:{}, finalPool:[], final5:[],
+  stages:[], stageStart:0, stageToggles:0
+};
+const STAGE_KEY = {1:"positive_select",2:"positive_drop_1",3:"positive_drop_2",
+  4:"positive_drop_3",5:"negative_select",6:"negative_drop",7:"opposite_select",8:"final_select"};
+const STAGE_NAME = {
+  positive_select:"긍정 단어 20개 선택",
+  positive_drop_1:"긍정 단어 1차 덜어내기",
+  positive_drop_2:"긍정 단어 2차 덜어내기",
+  positive_drop_3:"긍정 단어 3차 덜어내기",
+  negative_select:"부정 단어 10개 선택",
+  negative_drop:"부정 단어 덜어내기",
+  opposite_select:"반대 긍정어 선택",
+  final_select:"최종 5개 선택"
+};
+function beginStage(){ state.stageStart=Date.now(); state.stageToggles=0; }
+function endStage(id){
+  state.stages.push({stage:STAGE_KEY[id],
+    duration_ms:Date.now()-state.stageStart,
+    total_toggles:state.stageToggles});
+}
+
+/* ═══════════ 진행 표시 ═══════════ */
+const trailEl = document.getElementById("trail");
+function drawTrail(){
+  let h="";
+  for(let i=1;i<=8;i++){
+    const cls = i<state.trailPos?"done": i===state.trailPos?"now":"";
+    h+=`<div class="dot ${cls}"></div>`;
+    if(i<8) h+=`<div class="seg ${i<state.trailPos?"done":""}"></div>`;
+  }
+  trailEl.innerHTML=h;
+}
+drawTrail();
+
+/* ═══════════ 화면 전환 ═══════════ */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+  const el=document.getElementById(id);
+  el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+  window.scrollTo({top:0});
+}
+function start(){ state.stepIdx=0; loadStep(); }
+
+/* ═══════════ 선택/덜어내기 공용 로직 ═══════════ */
+const $=id=>document.getElementById(id);
+function loadStep(){
+  const st=STEPS[state.stepIdx];
+  state.trailPos=st.id; drawTrail();
+  state.selected=new Set();
+
+  if(st.mode==="pick") state.pool=[...st.pool()];
+  else{
+    if(st.id===2) state.pool=[...state.pos20];
+    if(st.id===3) state.pool=[...state.pos15];
+    if(st.id===4) state.pool=[...state.pos10];
+    if(st.id===6) state.pool=[...state.neg10];
+  }
+
+  $("st-eyebrow").textContent=st.eyebrow;
+  $("st-title").textContent = (st.id===8)
+    ? st.title.replace("10개", state.finalPool.length+"개")
+    : st.title;
+  $("st-sub").textContent=st.sub;
+  $("st-count").className="count"+(st.minus?" minus":"");
+
+  const box=$("st-chips"); box.innerHTML="";
+  state.pool.forEach(w=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="chip"+(st.minus?" mchip":"");
+    b.textContent=w;
+    b.onclick=()=>toggle(w,b,st);
+    box.appendChild(b);
+  });
+  updateCount(st);
+  beginStage();
+  show("s-step");
+}
+function toggle(w,btn,st){
+  if(state.selected.has(w)){ state.selected.delete(w); }
+  else{
+    if(state.selected.size>=st.need) return;
+    state.selected.add(w);
+  }
+  state.stageToggles++;
+  if(st.mode==="pick") btn.classList.toggle("sel",state.selected.has(w));
+  else btn.classList.toggle("dropped",state.selected.has(w));
+  updateCount(st);
+}
+function updateCount(st){
+  $("st-count").innerHTML=`${st.label} <b>${state.selected.size}</b> / ${st.need}`;
+  $("st-next").disabled = state.selected.size!==st.need;
+}
+function nextStep(){
+  const st=STEPS[state.stepIdx];
+  const sel=[...state.selected];
+  const remain=state.pool.filter(w=>!state.selected.has(w));
+  endStage(st.id);
+  if(st.id===1) state.pos20=sel;
+  if(st.id===2){ state.dropped1=sel; state.pos15=remain; }
+  if(st.id===3){ state.dropped2=sel; state.pos10=remain; }
+  if(st.id===4){ state.dropped3=sel; state.pos5=remain; }
+  if(st.id===5) state.neg10=sel;
+  if(st.id===6){ state.droppedNeg=sel; state.neg5=remain; loadFlip(); return; }
+  if(st.id===8){ state.final5=sel; loadDone(); return; }
+  state.stepIdx++; loadStep();
+}
+
+/* ═══════════ 7단계 · 전환 ═══════════ */
+function loadFlip(){
+  state.trailPos=7; drawTrail();
+  state.flips={};
+  const box=$("fl-cards"); box.innerHTML="";
+  state.neg5.forEach(neg=>{
+    const card=document.createElement("div"); card.className="flip-card";
+    const head=document.createElement("div");
+    head.innerHTML=`<span class="flip-neg">${neg}</span><span class="flip-arrow">→ 내가 원하는 힘은?</span>`;
+    card.appendChild(head);
+    const opts=document.createElement("div"); opts.className="flip-opts";
+    (NEGATIVE[neg]||[]).forEach(op=>{
+      const b=document.createElement("button");
+      b.type="button"; b.className="chip"; b.textContent=op;
+      b.onclick=()=>{
+        state.stageToggles++;
+        state.flips[neg]=op;
+        opts.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));
+        b.classList.add("sel");
+        updateFlipCount();
+      };
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+    box.appendChild(card);
+  });
+  updateFlipCount();
+  beginStage();
+  show("s-flip");
+}
+function updateFlipCount(){
+  const n=Object.keys(state.flips).length;
+  $("fl-count").innerHTML=`완료 <b>${n}</b> / 5`;
+  $("fl-next").disabled = n!==5;
+}
+function finishFlip(){
+  endStage(7);
+  const flipped=state.neg5.map(n=>state.flips[n]);
+  state.finalPool=[...new Set([...state.pos5,...flipped])];
+  state.stepIdx=STEPS.findIndex(s=>s.id===8);
+  loadStep();
+}
+
+/* ═══════════ 완료 ═══════════ */
+function loadDone(){
+  state.trailPos=9; drawTrail();
+  state.stages.push({stage:"result",duration_ms:null,total_toggles:0});
+  const v=$("dn-values"); v.innerHTML="";
+  state.final5.forEach((w,i)=>{
+    const row=document.createElement("div");
+    row.className="value-row"; row.style.animationDelay=(i*0.12)+"s";
+    row.innerHTML=`<span class="n">${["하나","둘","셋","넷","다섯"][i]}</span><span class="w">${w}</span>`;
+    v.appendChild(row);
+  });
+  $("dn-prompt").value=buildPrompt();
+  show("s-done");
+}
+
+function buildPrompt(){
+  /* 가장 많이 망설인/오래 걸린 단계 계산 */
+  const measurable=state.stages.filter(s=>s.duration_ms!==null);
+  const mostToggled=measurable.reduce((a,b)=>b.total_toggles>a.total_toggles?b:a);
+  const longest=measurable.reduce((a,b)=>b.duration_ms>a.duration_ms?b:a);
+
+  const data={
+    final_positive_5: state.final5,
+    journey:{
+      positive_selected_20: state.pos20,
+      dropped_positive:{
+        step1: state.dropped1,
+        step2: state.dropped2,
+        step3: state.dropped3
+      },
+      positive_core_5: state.pos5,
+      negative_selected_10: state.neg10,
+      dropped_negative: state.droppedNeg,
+      negative_core_5: state.neg5,
+      opposite_choices: state.neg5.map(n=>({negative:n, chosen_opposite:state.flips[n]}))
+    },
+    stage_summaries: state.stages
+  };
+
+  return `당신은 한 사람의 내면 여정 데이터를 분석하는 깊이 있는 심리 통찰가입니다.
+아래는 이 사람이 200여 개의 가치 단어 중에서 단계적으로 선택하고 덜어내며 완성한 데이터입니다.
+가장 많이 망설인 단계는 "${STAGE_NAME[mostToggled.stage]}"(토글 ${mostToggled.total_toggles}회)이고, 가장 오래 걸린 단계는 "${STAGE_NAME[longest.stage]}"(${Math.round(longest.duration_ms/1000)}초)입니다.
+
+--- DATA ---
+${JSON.stringify(data,null,2)}
+--- END DATA ---
+
+위 데이터를 바탕으로 아래 일곱 가지를 분석해주세요.
+각 항목은 문단 형식으로, 이 사람이 읽었을 때 자신의 이야기처럼 느껴질 만큼 구체적이고 따뜻하게 써주세요.
+※ 출력할 때 【인생 타이틀】과 【내면의 과제】를 반드시 맨 위에, 이 순서대로 가장 먼저 보여주세요.
+
+1. 【인생 타이틀】
+이 사람의 삶을 한 문장으로 압축한 타이틀을 제시해주세요.
+선택한 단어들의 결을 읽어, 이 사람이 추구하는 삶의 방향이 담긴 시적이고 울림 있는 문장으로 표현해주세요.
+
+2. 【내면의 과제】
+negative_core_5는 이 사람이 가장 직면하고 싶은 그림자입니다.
+그 단어들이 이 사람의 삶에서 어떤 의미를 가질지, 그리고 반대편으로 선택한 긍정어와 어떻게 연결되는지 이야기해주세요.
+
+3. 【확신의 가치 vs 열망의 가치】
+긍정 단어 여정에서 끝까지 살아남은 positive_core_5는 이미 이 사람 안에 뿌리내린 확신입니다.
+반면 마이너스 에너지의 반대편으로 새롭게 선택된 opposite_choices의 단어들은 지금 이 사람이 가장 원하는 열망입니다.
+이 둘의 차이와 의미를 풀어주세요.
+
+4. 【세 가지 장면 속의 나】
+이 사람의 가치관 데이터를 바탕으로, 아래 세 가지 일상 장면에서 이 사람이 어떤 모습일지 풍부하게 묘사해주세요.
+각 장면마다 줄글 설명과 함께, 이 사람이 실제로 할 법한 말이나 생각을 큰따옴표 안에 한 문장씩 포함해주세요.
+그리고 각 장면 끝에 아래 소항목도 자연스럽게 녹여주세요.
+
+- 혼자 있을 때의 나 (일상, 여가, 혼자만의 시간)
+  · 이 사람이 혼자 있을 때 자주 하는 생각이나 행동
+  · 이 사람이 에너지를 얻는 방식과 소진되는 방식
+  · 이 사람이 좋아하는 분위기나 공간
+
+- 친구들과 함께 있을 때의 나 (관계, 대화, 분위기)
+  · 이 사람이 친구 관계에서 자연스럽게 맡게 되는 역할
+  · 이 사람과 잘 맞는 사람의 유형 (가치관, 태도, 성향)
+  · 이 사람이 불편하거나 힘들어하는 사람의 유형
+  · 이 사람이 싫어하는 대화 분위기나 상황
+
+- 직장이나 역할 속의 나 (일, 책임, 동료와의 관계)
+  · 이 사람이 일할 때 강점으로 드러나는 면
+  · 이 사람이 스트레스를 받는 환경이나 상황
+  · 이 사람과 잘 맞는 동료나 조직 문화
+  · 이 사람이 가장 힘들어하는 직장 내 상황이나 관계
+
+5. 【이 사람이 주의해야 할 점】
+지금까지의 분석을 바탕으로, 이 사람이 가진 가치관과 성향이 때로는 스스로에게 짐이 되거나 관계에서 마찰을 일으킬 수 있는 부분을 솔직하게 짚어주세요.
+좋은 말만 늘어놓지 말고, 진짜 친한 친구가 조심스럽게 건네는 말처럼 따뜻하지만 직접적으로 써주세요.
+아래 항목들을 자연스러운 줄글로 풀어주되, 각 항목마다 실제 상황을 떠올릴 수 있는 구체적인 예시를 함께 포함해주세요.
+
+· 이 사람이 자신도 모르게 빠지기 쉬운 함정이나 패턴
+  (예: 완벽을 추구하다 정작 아무것도 시작하지 못하는 경우 등)
+· 타인에게 의도치 않게 주는 부담이나 불편함
+  (예: 기준이 높아서 주변 사람이 위축되거나 눈치 보게 되는 경우 등)
+· 스스로를 소진시키는 방식
+  (예: 혼자 감당하려 하거나, 쉬는 것을 게으름으로 느끼는 경우 등)
+· 성장을 위해 의식적으로 연습하면 좋을 태도나 행동
+  (예: 완벽하지 않아도 괜찮다고 스스로에게 말해주는 연습 등)
+
+6. 【이 사람에게 건네는 말】
+분석을 마치고, 이 사람에게 직접 말을 건네듯 따뜻하고 진심 어린 한 문단을 써주세요.
+데이터에서 읽힌 이 사람의 고유한 결을 담아, 읽는 사람이 가슴 깊이 울릴 수 있도록 써주세요.
+
+7. 【핵심 요약】
+마지막으로, 위 분석 전체의 핵심을 딱 세 줄로 요약해주세요.
+각 줄은 짧고 선명한 한 문장으로, 이 사람이 오래 기억하고 되새길 수 있는 문장으로 써주세요.`;
+}
+
+function copyPrompt(){
+  const ta=$("dn-prompt");
+  const done=()=>{ const b=$("dn-copy"); b.textContent="복사되었습니다 ✓";
+    setTimeout(()=>b.textContent="복사하기",1800); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(done).catch(()=>{fallbackCopy(ta);done();});
+  }else{ fallbackCopy(ta); done(); }
+}
+function fallbackCopy(ta){
+  ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+  try{ document.execCommand("copy"); }catch(e){}
+  window.getSelection().removeAllRanges();
+}
+</script>
+</body>
+</html>
